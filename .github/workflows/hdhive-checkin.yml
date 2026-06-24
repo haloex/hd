@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # 01:00 UTC = 09:00 Asia/Shanghai. The job then sleeps randomly.
-    - cron: "0 1 * * *"
+    - cron: "0 2 * * *"
 
 concurrency:
   group: hdhive-checkin
@@ -18,7 +18,7 @@ jobs:
       HDHIVE_ACCOUNTS: ${{ secrets.HDHIVE_ACCOUNTS }}
       TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
       TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-      RANDOM_DELAY_SECONDS: 21600
+      RANDOM_DELAY_SECONDS: 1800
 
     steps:
       - name: Checkout
