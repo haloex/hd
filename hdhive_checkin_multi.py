@@ -66,6 +66,16 @@ def get_cookie_value(raw: str, name: str) -> str:
 
 
 def load_accounts() -> list[Account]:
+    split_accounts: list[Account] = []
+    for idx in range(1, 11):
+        cookie = os.getenv(f"HDHIVE_COOKIE_{idx}", "").strip()
+        if not cookie:
+            continue
+        name = os.getenv(f"HDHIVE_ACCOUNT_{idx}_NAME", "").strip() or f"account-{idx}"
+        split_accounts.append(Account(name=name, cookie=cookie))
+    if split_accounts:
+        return split_accounts
+
     raw_accounts = os.getenv("HDHIVE_ACCOUNTS", "").strip()
     if raw_accounts:
         try:
@@ -90,7 +100,7 @@ def load_accounts() -> list[Account]:
     if single_cookie:
         return [Account(name=os.getenv("HDHIVE_ACCOUNT_NAME", "account-1"), cookie=single_cookie)]
 
-    raise SystemExit("Set HDHIVE_ACCOUNTS or HDHIVE_COOKIE in GitHub Secrets.")
+    raise SystemExit("Set HDHIVE_COOKIE_1/HDHIVE_COOKIE_2, HDHIVE_ACCOUNTS, or HDHIVE_COOKIE in GitHub Secrets.")
 
 
 def classify_response(payload: dict[str, Any]) -> tuple[str, str]:
@@ -108,6 +118,30 @@ def classify_response(payload: dict[str, Any]) -> tuple[str, str]:
         return "expired", data.get("description") or data.get("message") or "Cookie 可能已过期"
 
     return "failed", data.get("description") or data.get("message") or (str(payload.get("text") or "")[:300] or "签到失败")
+
+
+def classify_direct_error(payload: dict[str, Any]) -> CheckinResult | None:
+    error = str(payload.get("error") or "")
+    code = str(payload.get("code") or "")
+    merged = f"{error}\n{code}".lower()
+    if any(
+        marker.lower() in merged
+        for marker in [
+            "x-hdh-rsig",
+            "invalid_session",
+            "missing_signature",
+            "signature_invalid",
+            "unauthorized",
+            "forbidden",
+            "401",
+            "403",
+            "token",
+            "cookie",
+            "重新登录",
+        ]
+    ):
+        return CheckinResult("unknown", "expired", "Cookie/session 可能已过期，请重新复制该账号 Cookie")
+    return None
 
 
 async def direct_signed_checkin(page: Any, user_id: str) -> dict[str, Any]:
@@ -221,6 +255,10 @@ async def check_one(browser: Any, account: Account) -> CheckinResult:
 
         payload = await direct_signed_checkin(page, get_cookie_value(account.cookie, "hdh_uid") or "0")
         if not payload.get("ok"):
+            classified = classify_direct_error(payload)
+            if classified:
+                classified.name = account.name
+                return classified
             return CheckinResult(account.name, "failed", f"直接签到接口不可用：{payload.get('error')}")
 
         status, message = classify_response(payload)
