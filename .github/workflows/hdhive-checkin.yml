@@ -3,7 +3,7 @@ name: HDHive Checkin
 on:
   workflow_dispatch:
   schedule:
-    # 01:00 UTC = 09:00 Asia/Shanghai. The job then sleeps randomly.
+    # 17:00 UTC = 01:00 Asia/Shanghai. The job then sleeps randomly.
     - cron: "0 2 * * *"
 
 concurrency:
@@ -16,6 +16,16 @@ jobs:
     timeout-minutes: 390
     env:
       HDHIVE_ACCOUNTS: ${{ secrets.HDHIVE_ACCOUNTS }}
+      HDHIVE_ACCOUNT_1_NAME: ${{ secrets.HDHIVE_ACCOUNT_1_NAME }}
+      HDHIVE_COOKIE_1: ${{ secrets.HDHIVE_COOKIE_1 }}
+      HDHIVE_ACCOUNT_2_NAME: ${{ secrets.HDHIVE_ACCOUNT_2_NAME }}
+      HDHIVE_COOKIE_2: ${{ secrets.HDHIVE_COOKIE_2 }}
+      HDHIVE_ACCOUNT_3_NAME: ${{ secrets.HDHIVE_ACCOUNT_3_NAME }}
+      HDHIVE_COOKIE_3: ${{ secrets.HDHIVE_COOKIE_3 }}
+      HDHIVE_ACCOUNT_4_NAME: ${{ secrets.HDHIVE_ACCOUNT_4_NAME }}
+      HDHIVE_COOKIE_4: ${{ secrets.HDHIVE_COOKIE_4 }}
+      HDHIVE_ACCOUNT_5_NAME: ${{ secrets.HDHIVE_ACCOUNT_5_NAME }}
+      HDHIVE_COOKIE_5: ${{ secrets.HDHIVE_COOKIE_5 }}
       TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
       TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
       RANDOM_DELAY_SECONDS: 1800
