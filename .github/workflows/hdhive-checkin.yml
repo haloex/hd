@@ -13,7 +13,7 @@ concurrency:
 jobs:
   checkin:
     runs-on: ubuntu-latest
-    timeout-minutes: 390
+    timeout-minutes: 60
     env:
       HDHIVE_ACCOUNTS: ${{ secrets.HDHIVE_ACCOUNTS }}
       HDHIVE_ACCOUNT_1_NAME: ${{ secrets.HDHIVE_ACCOUNT_1_NAME }}
